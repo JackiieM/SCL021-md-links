@@ -1,39 +1,44 @@
 #!/usr/bin/env node
 // IMPORTS
 const path = require('path');
-const fs = require('fs');
-
-// Variables globales
-const userInput = process.argv[2]
-let absoluteLink = userInput; // Si el directorio es relativo, aquí se guarda el valor absoluto
-const inputType = fs.statSync(absoluteLink)
-const validExt = ".md"
-const fileExt = path.extname(userInput)
-console.log(process.argv[2])
-console.log("¿Es un link absoluto?:", path.isAbsolute(userInput))
-console.log("Link absoluto:", path.resolve(userInput))
-console.log("¿Es un archivo?:", inputType.isFile())
-console.log("¿Es una carpeta?:", inputType.isDirectory())
+const fs = require('fs')
 
 // FUNCIONES DE LECTURA
-
-
-
-//transforma input links de relativos a absolutos
-const getAbsoluteLink = () => {
-    if(path.isAbsolute(userInput) === false){
-        absoluteLink = path.resolve(userInput)
-    }
+// Verifica si la ruta es un archivo, si es directory retorna false
+const routeType = (source) => {
+    if(source.isFile() === true) {
+        return true
+    } return false
 }
-getAbsoluteLink()
+// Transforma input links de relativos a absolutos
+const getAbsoluteLink = (source) => {
+    if(path.isAbsolute(source) === false){
+        return path.resolve(source)
+    } return source
+}
+// Busca y filtra archivos .md de una ruta
+const filterFiles = (source, validExt, filesArr) => {
+    fs.readdir(source,(err, files) => {
+        if(err) {
+            console.log ("Esta ruta no es un directorio.")
+        } else {
+            console.log ("Archivos encontrados:")
+            files.forEach(file => {
+                if (path.extname(file) === validExt) {
+                    filesArr.push(file);
+                    console.log(file)
+                }
+            })
+        }
+    })
+}
 // Verifica si la extensión del archivo es .md
-const extValidator = () => {
-    if(absoluteLink && fileExt === validExt){
-        console.log("Archivo válido! continuando análisis...")
+const extValidator = (source, sourceExt, validExt) => {
+    if(source && sourceExt === validExt){
+        return "Archivo válido! continuando análisis..."
     } else {
-        console.log("Whoops! Este no es un archivo .md, por favor ingresa un archivo compatible.")
+        return "Whoops! Este no es un archivo .md, por favor ingresa un archivo compatible."
     }
 }
-
-extValidator() 
 // break de lloración
+module.exports = {routeType, getAbsoluteLink, extValidator, filterFiles};

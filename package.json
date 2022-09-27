@@ -1,6 +1,11 @@
 {
   "name": "md-links",
   "version": "0.1.0",
+  "description": "Analiza archivo/archivos .md en busca de enlaces para luego validar el estado de estos",
+  "main": "./bin/index.js",
+  "bin": {
+    "mdscan": "./bin/index.js"
+  },
   "engines": {
     "node": ">=16.x"
   }
