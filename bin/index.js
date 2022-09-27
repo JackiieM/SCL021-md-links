@@ -10,8 +10,8 @@ const absoluteLink = getAbsoluteLink(userInput) // Devuelve ruta absoluta
 const inputType = fs.statSync(absoluteLink) // Devuelve true si es archivo y false si es carpeta
 const validExt = ".md" // Extensión deseada
 const fileExt = path.extname(absoluteLink) // Extensión del archivo
-const foundFiles = [];
 
-filterFiles(absoluteLink, validExt, foundFiles)
+
+filterFiles(absoluteLink, validExt)
 
 

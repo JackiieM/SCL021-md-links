@@ -17,20 +17,25 @@ const getAbsoluteLink = (source) => {
     } return source
 }
 // Busca y filtra archivos .md de una ruta
-const filterFiles = (source, validExt, filesArr) => {
+const filterFiles = (source, validExt) => {
+    const foundFiles = [];
     fs.readdir(source,(err, files) => {
         if(err) {
             console.log ("Esta ruta no es un directorio.")
         } else {
+            
             console.log ("Archivos encontrados:")
             files.forEach(file => {
                 if (path.extname(file) === validExt) {
-                    filesArr.push(file);
+                    foundFiles.push(file);
                     console.log(file)
                 }
             })
+            if(foundFiles.length === 0) {
+                return console.log("No se encontraron archivos .md en este directorio.")
+            } return console.log(foundFiles)
         }
-    })
+    }) 
 }
 // Verifica si la extensión del archivo es .md
 const extValidator = (source, sourceExt, validExt) => {
