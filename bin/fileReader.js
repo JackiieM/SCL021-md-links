@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 // IMPORTS
 const path = require('path');
-const fs = require('fs')
+const fs = require('fs');
+const https = require('https')
 const urlRegEx = /(?:(?:https?|ftp|file):\/\/|www\.|ftp\.)(?:\([-A-Z0-9+&@#\/%=~_|$?!:,.]*\)|[-A-Z0-9+&@#\/%=~_|$?!:,.])*(?:\([-A-Z0-9+&@#\/%=~_|$?!:,.]*\)|[A-Z0-9+&@#\/%=~_|$])/igm;
 // FUNCIONES DE LECTURA
 // Transforma input de ruta de relativos a absolutos
@@ -61,11 +62,29 @@ const searchURL = (source) => {
         })
     })
 }
-// Cuenta links unicos y repetidos
+// Cuenta links unicos
 const uniqueLinks = (source) => {
-    const unique = source.filter(url => url === url).length
+    let unique = 0;
+    source.forEach((link, index) => {
+        if(source.indexOf(link) === index) {
+            unique++
+        }
+    }) 
     return unique
+}
+const validateLinks = (source) => {
+    return new Promise((resolve, reject) => {
+        source.forEach(link => {
+            https.get(link, res => {
+                if(res.statusCode === 200) {
+                    resolve (console.log(link, res.statusCode, "OK"))
+                } else if(res.statusCode < 200 || res.statusCode > 200){
+                    reject ("Este link no funciona:", link)
+                }
+            })
+        })
+    })
 }
 
 // break de lloración
-module.exports = {routeType, getAbsoluteLink, extValidator, filterFiles, searchURL, uniqueLinks};
+module.exports = {routeType, getAbsoluteLink, extValidator, filterFiles, searchURL, uniqueLinks, validateLinks};
