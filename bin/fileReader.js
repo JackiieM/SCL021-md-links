@@ -2,7 +2,7 @@
 // IMPORTS
 const path = require('path');
 const fs = require('fs')
-const urlRegEx = '^(?!mailto:)(?:(?:http|https|ftp)://)(?:\\S+(?::\\S*)?@)?(?:(?:(?:[1-9]\\d?|1\\d\\d|2[01]\\d|22[0-3])(?:\\.(?:1?\\d{1,2}|2[0-4]\\d|25[0-5])){2}(?:\\.(?:[0-9]\\d?|1\\d\\d|2[0-4]\\d|25[0-4]))|(?:(?:[a-z\\u00a1-\\uffff0-9]+-?)*[a-z\\u00a1-\\uffff0-9]+)(?:\\.(?:[a-z\\u00a1-\\uffff0-9]+-?)*[a-z\\u00a1-\\uffff0-9]+)*(?:\\.(?:[a-z\\u00a1-\\uffff]{2,})))|localhost)(?::\\d{2,5})?(?:(/|\\?|#)[^\\s]*)?$';
+const urlRegEx = /(?:(?:https?|ftp|file):\/\/|www\.|ftp\.)(?:\([-A-Z0-9+&@#\/%=~_|$?!:,.]*\)|[-A-Z0-9+&@#\/%=~_|$?!:,.])*(?:\([-A-Z0-9+&@#\/%=~_|$?!:,.]*\)|[A-Z0-9+&@#\/%=~_|$])/igm;
 // FUNCIONES DE LECTURA
 // Transforma input de ruta de relativos a absolutos
 const getAbsoluteLink = (source) => {
@@ -23,26 +23,49 @@ const extValidator = (sourceExt, validExt) => {
     }  return false
 }
 // Busca y filtra archivos .md de un directorio
-const filterFiles = (source, validExt) => {
-    const foundFiles = [];
-    fs.readdir(source,(err, files) => {
-        if(err) {
-            console.log ("\x1b[31m","Esta ruta no es un directorio.", "\x1b[0m")
-        } else {
+const filterFiles = (source, ext) => {
+    return new Promise((resolve, reject) => {
+        const foundFiles = [];
+        fs.readdir(source,(err, files) => {
+            if(err) {
+                console.log(err)
+                reject(err)
+            } 
             console.log ("\x1b[32m", "Archivos encontrados:", "\x1b[0m")
             files.forEach(file => {
-                if (path.extname(file) === validExt) {
+                if (path.extname(file) === ext) {
                     foundFiles.push(file);
-                    console.log(file)
-                }
+                } 
             })
-            if(foundFiles.length === 0) {
-                return console.log("No se encontraron archivos .md en este directorio.")
-            } 
-            return foundFiles;
-        }
-    }) 
+            resolve(foundFiles) 
+        })
+    })
+}
+
+// Lectura de documentos
+const searchURL = (source) => {
+    return new Promise((resolve, reject) => {
+        const linksData = [];
+        fs.readFile(source, 'utf8', (err,data) => {
+            if(err) {
+                reject(console.log(err))
+            } else if (data.match(urlRegEx) === null) {
+                return (console.log("No hay links en este documento :("))
+            } else if (data) {
+                data.match(urlRegEx).forEach(link => {
+                linksData.push(link)
+                //console.log(link)
+                })
+            resolve(linksData) 
+            }
+        })
+    })
+}
+// Cuenta links unicos y repetidos
+const uniqueLinks = (source) => {
+    const unique = source.filter(url => url === url).length
+    return unique
 }
 
 // break de lloración
-module.exports = {routeType, getAbsoluteLink, extValidator, filterFiles};
+module.exports = {routeType, getAbsoluteLink, extValidator, filterFiles, searchURL, uniqueLinks};
