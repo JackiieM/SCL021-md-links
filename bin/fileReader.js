@@ -27,12 +27,12 @@ const extValidator = (sourceExt, validExt) => {
 const filterFiles = (source, ext) => {
     return new Promise((resolve, reject) => {
         const foundFiles = [];
-        fs.readdir(source,(err, files) => {
+        fs.readdir(source, 'utf8',(err, files) => {
             if(err) {
                 console.log(err)
                 reject(err)
             } 
-            console.log ("\x1b[32m", "Archivos encontrados:", "\x1b[0m")
+            //console.log ("\x1b[32m", "Archivos encontrados:", "\x1b[0m")
             files.forEach(file => {
                 if (path.extname(file) === ext) {
                     foundFiles.push(file);
@@ -42,7 +42,6 @@ const filterFiles = (source, ext) => {
         })
     })
 }
-
 // Lectura de documentos
 const searchURL = (source) => {
     return new Promise((resolve, reject) => {
@@ -72,14 +71,15 @@ const uniqueLinks = (source) => {
     }) 
     return unique
 }
+//Valida los links 
 const validateLinks = (source) => {
-    return new Promise((resolve, reject) => {
-        source.forEach(link => {
-            https.get(link, res => {
+    return source.map(url => {
+        return new Promise((resolve) => {
+            https.get(url, res => {
                 if(res.statusCode === 200) {
-                    resolve (console.log(link, res.statusCode, "OK"))
-                } else if(res.statusCode < 200 || res.statusCode > 200){
-                    reject ("Este link no funciona:", link)
+                    resolve({file: process.argv[2], url: url, "status code": res.statusCode, message: "OK"})
+                } else {
+                    resolve({file: process.argv[2], url: url, "status code": res.statusCode, message: "FAIL"})
                 }
             })
         })

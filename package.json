@@ -4,7 +4,7 @@
   "description": "Analiza archivo/archivos .md en busca de enlaces para luego validar el estado de estos",
   "main": "./bin/index.js",
   "bin": {
-    "mdscan": "./bin/index.js"
+    "mdscan": "./bin/mdLinks.js"
   },
   "engines": {
     "node": ">=16.x"
