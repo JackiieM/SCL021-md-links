@@ -16,7 +16,6 @@ const fileExt = path.extname(absoluteLink) // Extensión del archivo
 const mdLinks = (route, options) => {
     return new Promise((resolve, reject) => {
         const linksArr = [];
-        const filesArr = [];
         // Primero verifica si la ruta es a un archivo
         if(routeType(inputType)) {
             // De ser así, comprobamos que la extensión del archivo sea .md
@@ -30,7 +29,7 @@ const mdLinks = (route, options) => {
                     links.forEach(url => {
                     linksArr.push(url)  
                     })
-                    if(options === "--stats --validate" || "--validate --stats") {
+                    if(options === "--stats --validate" || options === "--validate --stats") {
                         const total = linksArr.length
                         const unique = uniqueLinks(linksArr)
                         
@@ -46,10 +45,9 @@ const mdLinks = (route, options) => {
                             console.log("Links rotos:", brokenLinks))    
                         })
                         .catch(err => {
-                            console.log(err)
+                            reject(err)
                         })
 
-                       
                         } else if (options === "--stats"){
                             const total = linksArr.length
                             const unique = uniqueLinks(linksArr)
@@ -62,24 +60,76 @@ const mdLinks = (route, options) => {
                                 const linksObj = res.map(url => url.value)
                                 resolve(console.log(linksObj))
                             })
-
-                    }
+                            .catch(err => {
+                                reject(err)
+                            })
+                        }
+                })
+                .catch(err => {
+                    reject(err)
                 })
             }
-        /*} else {
+        } else {
             filterFiles(absoluteLink, validExt)
             .then(files => {
                 if(files.length === 0){
                     reject("No hay archivos .md en este directorio :(")
                 } else {
+                    files.forEach(markdown => {
+                        searchURL(markdown)
+                        .then(links =>{
+                            links.forEach(url => {
+                                linksArr.push(url)
+                            })
+                            if(options === "--stats --validate" || options === "--validate --stats") {
+                                const total = linksArr.length
+                                const unique = uniqueLinks(linksArr)
+                                Promise.allSettled(validateLinks(linksArr))
+                                .then(res => {
+                                    const linksObj = res.map(url => url.value)
+                                    const validLinks = linksObj.filter(url => url["status code"] === 200).length
+                                    const brokenLinks = total - validLinks
+        
+                                    resolve(console.log("-----------------------------------"),
+                                    console.log(`${path.parse(markdown).name}:`),
+                                    console.log("Total de links:", total),
+                                    console.log("Links únicos:", unique),
+                                    console.log("Links validados:", validLinks),
+                                    console.log("Links rotos:", brokenLinks),
+                                    console.log("-----------------------------------"))    
+                                })
 
+                                .catch(err=>{
+                                    reject(err)
+                                })
+                            }  else if (options === "--stats"){
+                                const total = linksArr.length
+                                const unique = uniqueLinks(linksArr)
+                                resolve(console.log("Total de links:", total),
+                                console.log("Links únicos:", unique))
+    
+                            } else if (options === "--validate") {
+                                Promise.allSettled(validateLinks(linksArr))
+                                .then(res => {
+                                    const linksObj = res.map(url => url.value)
+                                    resolve(console.log(linksObj))
+                                })
+                                .catch(err => {
+                                    reject(err)
+                                })
+                            }
+                        })
+                        .catch(err =>{
+                            reject(err)
+                        })
+                    })
                 }
             })
             .catch(err => {
                 reject(err)
-            })*/ 
+            })
         }
     })
 }
 
-module.exports = {mdLinks, absoluteLink, inputType}
+module.exports = {mdLinks, absoluteLink}

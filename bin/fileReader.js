@@ -29,13 +29,14 @@ const filterFiles = (source, ext) => {
         const foundFiles = [];
         fs.readdir(source, 'utf8',(err, files) => {
             if(err) {
-                console.log(err)
                 reject(err)
             } 
-            //console.log ("\x1b[32m", "Archivos encontrados:", "\x1b[0m")
+            console.log ("\x1b[32m", "Archivos encontrados:", "\x1b[0m")
             files.forEach(file => {
                 if (path.extname(file) === ext) {
-                    foundFiles.push(file);
+                    console.log(file)
+                    //Por alguna razón no reconocía la ruta del documento, así que se crea la ruta tomando el source más el nombre del documento
+                    foundFiles.push(source + '\\' + path.parse(file).base);
                 } 
             })
             resolve(foundFiles) 
@@ -46,11 +47,12 @@ const filterFiles = (source, ext) => {
 const searchURL = (source) => {
     return new Promise((resolve, reject) => {
         const linksData = [];
-        fs.readFile(source, 'utf8', (err,data) => {
+          fs.readFile(source, 'utf8', (err, data) => {
             if(err) {
-                reject(console.log(err))
+                reject(new Error(err, {cause: 'error en searchURL'}))
             } else if (data.match(urlRegEx) === null) {
-                return (console.log("No hay links en este documento :("))
+                return (console.log("-----------------------------------"),
+                console.log(`${path.parse(source).name}: No hay links en este documento :(`))
             } else if (data) {
                 data.match(urlRegEx).forEach(link => {
                 linksData.push(link)
@@ -74,7 +76,7 @@ const uniqueLinks = (source) => {
 //Valida los links 
 const validateLinks = (source) => {
     return source.map(url => {
-        return new Promise((resolve) => {
+        return new Promise((resolve, reject) => {
             https.get(url, res => {
                 if(res.statusCode === 200) {
                     resolve({file: process.argv[2], url: url, "status code": res.statusCode, message: "OK"})
