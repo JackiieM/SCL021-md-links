@@ -12,5 +12,8 @@
   "dependencies": {
     "chalk": "^5.0.1",
     "colors": "^1.4.0"
+  },
+  "scripts": {
+    "test": "jest --coverage"
   }
 }

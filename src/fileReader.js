@@ -40,6 +40,7 @@ const filterFiles = (source, ext) => {
                     foundFiles.push(source + '\\' + path.parse(file).base);
                 } 
             })
+            console.log("Realizando análisis...".rainbow)
             resolve(foundFiles) 
         })
     })
@@ -52,9 +53,13 @@ const searchURL = (source) => {
             if(err) {
                 reject(err)
             } else if (data.match(urlRegEx) === null) {
-                reject (console.log("---------------------------------------------------"),
-                console.log.apply(`${path.parse(source).base}: No hay links en este documento :(`),
-                console.log("---------------------------------------------------"))
+                reject(`
+---------------------------------------------------` +
+`
+${path.parse(source).base}: No hay links en este documento :(`.red.bold +
+
+`
+---------------------------------------------------`)
             } else if (data) {
                 data.match(urlRegEx).forEach(link => {
                 linksData.push(link)
@@ -80,9 +85,9 @@ const validateLinks = (source) => {
         return new Promise((resolve, reject) => {
             https.get(url, res => {
                 if(res.statusCode === 200) {
-                    resolve({file: process.argv[2], url: url, code: res.statusCode, message: "OK"})
+                    resolve({source: process.argv[2], url: url, code: res.statusCode, message: "OK"})
                 } else {
-                    resolve({file: process.argv[2], url: url, code: res.statusCode, message: "FAIL"})
+                    resolve({source: process.argv[2], url: url, code: res.statusCode, message: "FAIL"})
                 }
             })
         })
