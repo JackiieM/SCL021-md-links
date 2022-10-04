@@ -1,7 +1,9 @@
 #!/usr/bin/env node
 // IMPORTS
 const path = require('path');
-const fs = require('fs')
+const fs = require('fs');
+const https = require('https')
+const colors = require('colors');
 const urlRegEx = /(?:(?:https?|ftp|file):\/\/|www\.|ftp\.)(?:\([-A-Z0-9+&@#\/%=~_|$?!:,.]*\)|[-A-Z0-9+&@#\/%=~_|$?!:,.])*(?:\([-A-Z0-9+&@#\/%=~_|$?!:,.]*\)|[A-Z0-9+&@#\/%=~_|$])/igm;
 // FUNCIONES DE LECTURA
 // Transforma input de ruta de relativos a absolutos
@@ -26,46 +28,66 @@ const extValidator = (sourceExt, validExt) => {
 const filterFiles = (source, ext) => {
     return new Promise((resolve, reject) => {
         const foundFiles = [];
-        fs.readdir(source,(err, files) => {
+        fs.readdir(source, 'utf8',(err, files) => {
             if(err) {
-                console.log(err)
                 reject(err)
             } 
-            console.log ("\x1b[32m", "Archivos encontrados:", "\x1b[0m")
+            console.log ("Archivos encontrados:".green.bold)
             files.forEach(file => {
                 if (path.extname(file) === ext) {
-                    foundFiles.push(file);
+                    console.log(file)
+                    //Por alguna razón no reconocía la ruta del documento, así que se crea la ruta tomando el source más el nombre del documento
+                    foundFiles.push(source + '\\' + path.parse(file).base);
                 } 
             })
             resolve(foundFiles) 
         })
     })
 }
-
 // Lectura de documentos
 const searchURL = (source) => {
     return new Promise((resolve, reject) => {
         const linksData = [];
-        fs.readFile(source, 'utf8', (err,data) => {
+          fs.readFile(source, 'utf8', (err, data) => {
             if(err) {
-                reject(console.log(err))
+                reject(err)
             } else if (data.match(urlRegEx) === null) {
-                return (console.log("No hay links en este documento :("))
+                reject (console.log("---------------------------------------------------"),
+                console.log.apply(`${path.parse(source).base}: No hay links en este documento :(`),
+                console.log("---------------------------------------------------"))
             } else if (data) {
                 data.match(urlRegEx).forEach(link => {
                 linksData.push(link)
-                //console.log(link)
                 })
             resolve(linksData) 
             }
         })
     })
 }
-// Cuenta links unicos y repetidos
+// Cuenta links unicos
 const uniqueLinks = (source) => {
-    const unique = source.filter(url => url === url).length
+    let unique = 0;
+    source.forEach((link, index) => {
+        if(source.indexOf(link) === index) {
+            unique++
+        }
+    }) 
     return unique
+}
+//Valida los links 
+const validateLinks = (source) => {
+    return source.map(url => {
+        return new Promise((resolve, reject) => {
+            https.get(url, res => {
+                if(res.statusCode === 200) {
+                    resolve({file: process.argv[2], url: url, code: res.statusCode, message: "OK"})
+                } else {
+                    resolve({file: process.argv[2], url: url, code: res.statusCode, message: "FAIL"})
+                }
+            })
+        })
+    })
 }
 
 // break de lloración
-module.exports = {routeType, getAbsoluteLink, extValidator, filterFiles, searchURL, uniqueLinks};
+module.exports = {routeType, getAbsoluteLink, extValidator, filterFiles, searchURL, uniqueLinks, validateLinks};
