@@ -5,7 +5,7 @@
 * [1. Descripción](#1-descripción)
 * [2. Diagrama de Flujo](#2-diagrama-de-flujo)
 * [3. Instalación](#3-instalación)
-* [4. Ejemplos de uso](#4-consideraciones-generales)
+* [4. Ejemplos de uso](#4-ejemplos-de-uso)
 
 ***
 
