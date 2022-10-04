@@ -3,6 +3,7 @@
 const path = require('path');
 const fs = require('fs');
 const https = require('https')
+const colors = require('colors');
 const urlRegEx = /(?:(?:https?|ftp|file):\/\/|www\.|ftp\.)(?:\([-A-Z0-9+&@#\/%=~_|$?!:,.]*\)|[-A-Z0-9+&@#\/%=~_|$?!:,.])*(?:\([-A-Z0-9+&@#\/%=~_|$?!:,.]*\)|[A-Z0-9+&@#\/%=~_|$])/igm;
 // FUNCIONES DE LECTURA
 // Transforma input de ruta de relativos a absolutos
@@ -31,7 +32,7 @@ const filterFiles = (source, ext) => {
             if(err) {
                 reject(err)
             } 
-            console.log ("\x1b[32m", "Archivos encontrados:", "\x1b[0m")
+            console.log ("Archivos encontrados:".green.bold)
             files.forEach(file => {
                 if (path.extname(file) === ext) {
                     console.log(file)
@@ -49,14 +50,14 @@ const searchURL = (source) => {
         const linksData = [];
           fs.readFile(source, 'utf8', (err, data) => {
             if(err) {
-                reject(new Error(err, {cause: 'error en searchURL'}))
+                reject(err)
             } else if (data.match(urlRegEx) === null) {
-                return (console.log("-----------------------------------"),
-                console.log(`${path.parse(source).name}: No hay links en este documento :(`))
+                reject (console.log("---------------------------------------------------"),
+                console.log.apply(`${path.parse(source).base}: No hay links en este documento :(`),
+                console.log("---------------------------------------------------"))
             } else if (data) {
                 data.match(urlRegEx).forEach(link => {
                 linksData.push(link)
-                //console.log(link)
                 })
             resolve(linksData) 
             }
@@ -79,9 +80,9 @@ const validateLinks = (source) => {
         return new Promise((resolve, reject) => {
             https.get(url, res => {
                 if(res.statusCode === 200) {
-                    resolve({file: process.argv[2], url: url, "status code": res.statusCode, message: "OK"})
+                    resolve({file: process.argv[2], url: url, code: res.statusCode, message: "OK"})
                 } else {
-                    resolve({file: process.argv[2], url: url, "status code": res.statusCode, message: "FAIL"})
+                    resolve({file: process.argv[2], url: url, code: res.statusCode, message: "FAIL"})
                 }
             })
         })

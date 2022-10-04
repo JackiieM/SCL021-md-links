@@ -3,7 +3,8 @@
 const { routeType, getAbsoluteLink, extValidator, filterFiles, searchURL, uniqueLinks, validateLinks} = require('./fileReader.js');
 const path = require('path');
 const fs = require('fs');
-const { builtinModules } = require('module');
+const colors = require('colors');
+
 
 // Variables globales
 const userInput = process.argv[2] // Ruta entregada por el usuario
@@ -21,7 +22,7 @@ const mdLinks = (route, options) => {
             // De ser así, comprobamos que la extensión del archivo sea .md
             if(extValidator(fileExt, validExt) === false){
                 // Si el archivo no es .md, se rechaza 
-                reject ("Este no es un archivo .md :(")
+                reject ("Este no es un archivo .md :(".red.bold)
             } else {
                 // Pero si el archivo sí es .md, se analiza y se extraen los links
                 searchURL(route)
@@ -36,13 +37,16 @@ const mdLinks = (route, options) => {
                         Promise.allSettled(validateLinks(linksArr))
                         .then(res => {
                             const linksObj = res.map(url => url.value)
-                            const validLinks = linksObj.filter(url => url["status code"] === 200).length
+                            const validLinks = linksObj.filter(url => url.code === 200).length
                             const brokenLinks = total - validLinks
 
-                            resolve(console.log("Total de links:", total),
+                            resolve(console.log(`Archivo: ${path.parse(route).base}`),
+                            console.log("---------------------------------------------------"),
+                            console.log("Total de links:", total),
                             console.log("Links únicos:", unique),
                             console.log("Links validados:", validLinks),
-                            console.log("Links rotos:", brokenLinks))    
+                            console.log("Links rotos:", brokenLinks),
+                            console.log("---------------------------------------------------"))    
                         })
                         .catch(err => {
                             reject(err)
@@ -58,7 +62,7 @@ const mdLinks = (route, options) => {
                             Promise.allSettled(validateLinks(linksArr))
                             .then(res => {
                                 const linksObj = res.map(url => url.value)
-                                resolve(console.log(linksObj))
+                                resolve(linksObj)
                             })
                             .catch(err => {
                                 reject(err)
@@ -87,18 +91,17 @@ const mdLinks = (route, options) => {
                                 Promise.allSettled(validateLinks(linksArr))
                                 .then(res => {
                                     const linksObj = res.map(url => url.value)
-                                    const validLinks = linksObj.filter(url => url["status code"] === 200).length
+                                    const validLinks = linksObj.filter(url => url.code === 200).length;
                                     const brokenLinks = total - validLinks
         
-                                    resolve(console.log("-----------------------------------"),
-                                    console.log(`${path.parse(markdown).name}:`),
+                                    resolve(console.log(`Archivo: ${path.parse(markdown).base}:`.yellow.inverse),
+                                    console.log("---------------------------------------------------"),
                                     console.log("Total de links:", total),
                                     console.log("Links únicos:", unique),
                                     console.log("Links validados:", validLinks),
                                     console.log("Links rotos:", brokenLinks),
-                                    console.log("-----------------------------------"))    
+                                    console.log("---------------------------------------------------"))    
                                 })
-
                                 .catch(err=>{
                                     reject(err)
                                 })
@@ -112,7 +115,7 @@ const mdLinks = (route, options) => {
                                 Promise.allSettled(validateLinks(linksArr))
                                 .then(res => {
                                     const linksObj = res.map(url => url.value)
-                                    resolve(console.log(linksObj))
+                                    resolve(linksObj)
                                 })
                                 .catch(err => {
                                     reject(err)
