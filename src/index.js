@@ -40,13 +40,16 @@ const mdLinks = (route, options) => {
                             const validLinks = linksObj.filter(url => url.code === 200).length
                             const brokenLinks = total - validLinks
 
-                            resolve(console.log(`Archivo: ${path.parse(route).base}`),
-                            console.log("---------------------------------------------------"),
-                            console.log("Total de links:", total),
-                            console.log("Links únicos:", unique),
-                            console.log("Links validados:", validLinks),
-                            console.log("Links rotos:", brokenLinks),
-                            console.log("---------------------------------------------------"))    
+                            const results = `
+Archivo: ${path.parse(route).base}`.yellow.inverse + `
+---------------------------------------------------
+Total de links: ${total}
+Links únicos: ${unique}
+Links validados: ${validLinks}
+Links rotos: ${brokenLinks}
+---------------------------------------------------`
+                                    
+                            resolve(results)   
                         })
                         .catch(err => {
                             reject(err)
@@ -55,13 +58,19 @@ const mdLinks = (route, options) => {
                         } else if (options === "--stats"){
                             const total = linksArr.length
                             const unique = uniqueLinks(linksArr)
-                            resolve(console.log("Total de links:", total),
-                            console.log("Links únicos:", unique))
+                            const results = `
+Archivo: ${path.parse(route).base}`.yellow.inverse + `
+---------------------------------------------------
+Total de links: ${total}
+Links únicos: ${unique}
+---------------------------------------------------`
+                            resolve(results)
 
                         } else if (options === "--validate") {
                             Promise.allSettled(validateLinks(linksArr))
                             .then(res => {
                                 const linksObj = res.map(url => url.value)
+                                console.log(`Archivo: ${path.parse(route).base}`.yellow.inverse)
                                 resolve(linksObj)
                             })
                             .catch(err => {
@@ -77,7 +86,7 @@ const mdLinks = (route, options) => {
             filterFiles(absoluteLink, validExt)
             .then(files => {
                 if(files.length === 0){
-                    reject("No hay archivos .md en este directorio :(")
+                    reject("No hay archivos .md en este directorio :(".red.bold)
                 } else {
                     files.forEach(markdown => {
                         searchURL(markdown)
@@ -93,14 +102,16 @@ const mdLinks = (route, options) => {
                                     const linksObj = res.map(url => url.value)
                                     const validLinks = linksObj.filter(url => url.code === 200).length;
                                     const brokenLinks = total - validLinks
+                                    const results = `
+Archivo: ${path.parse(markdown).base}`.yellow.inverse + `
+---------------------------------------------------
+Total de links: ${total}
+Links únicos: ${unique}
+Links validados: ${validLinks}
+Links rotos: ${brokenLinks}
+---------------------------------------------------`
         
-                                    resolve(console.log(`Archivo: ${path.parse(markdown).base}:`.yellow.inverse),
-                                    console.log("---------------------------------------------------"),
-                                    console.log("Total de links:", total),
-                                    console.log("Links únicos:", unique),
-                                    console.log("Links validados:", validLinks),
-                                    console.log("Links rotos:", brokenLinks),
-                                    console.log("---------------------------------------------------"))    
+                                    resolve(console.log(results))    
                                 })
                                 .catch(err=>{
                                     reject(err)
@@ -108,14 +119,18 @@ const mdLinks = (route, options) => {
                             }  else if (options === "--stats"){
                                 const total = linksArr.length
                                 const unique = uniqueLinks(linksArr)
-                                resolve(console.log("Total de links:", total),
-                                console.log("Links únicos:", unique))
+                                const results = `Archivo: ${path.parse(markdown).base}`.yellow.inverse + `
+---------------------------------------------------
+Total de links: ${total}
+Links únicos: ${unique}
+---------------------------------------------------`
+                                resolve(console.log(results))
     
                             } else if (options === "--validate") {
                                 Promise.allSettled(validateLinks(linksArr))
                                 .then(res => {
                                     const linksObj = res.map(url => url.value)
-                                    resolve(linksObj)
+                                    resolve(console.log(`Archivo: ${path.parse(markdown).base}`.yellow.inverse, linksObj))
                                 })
                                 .catch(err => {
                                     reject(err)
