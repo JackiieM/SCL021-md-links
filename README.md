@@ -28,7 +28,7 @@ TODO
 
 Una vez instalada la librería, puedes ejecutarla con el comando 'mdscan' en tu terminal, agregando también la ruta al archivo o directorio que desees analizar (acepta tanto rutas relativas como absolutas), de la siguiente forma:
 
-![example1](./examples/01.png)
+![example1](./examples/001.png)
 
 Puedes especificar también qué información quieres obtener de los archivos, '--stats' te entrega datos generales de la cantidad de links en el archivo analizado (esta es la opción por default si no se ingresa nada después de la ruta):
 
