@@ -22,7 +22,9 @@ Este es el diagrama de flujo utilizado para guiar y desarrollar la lógica del p
 
 ## 3. Instalación
 
-TODO
+Para instalar la librería:
+
+`npm i mdscan`
 
 ## 4. Ejemplos de uso
 
